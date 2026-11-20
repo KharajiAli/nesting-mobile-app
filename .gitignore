@@ -1,0 +1,15 @@
+# Node
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+
+# Native projects (regenerated with `npx expo prebuild`)
+/android/
+/ios/
+
+# Misc
+.DS_Store
+*.orig

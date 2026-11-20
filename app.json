@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "Pattern Maker",
+    "slug": "pattern-maker",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Pattern Maker to use the camera to photograph garment patterns."
+        }
+      ]
+    ],
+    "android": {
+      "package": "com.patternmaker.app",
+      "permissions": [
+        "CAMERA",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "ios": {
+      "bundleIdentifier": "com.patternmaker.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Pattern Maker uses the camera to photograph garment patterns."
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7054aeff-b42d-441b-8f98-ce026c30e14b"
+      }
+    },
+    "owner": "taysonn"
+  }
+}
