@@ -25,7 +25,8 @@
     "ios": {
       "bundleIdentifier": "com.patternmaker.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "Pattern Maker uses the camera to photograph garment patterns."
+        "NSCameraUsageDescription": "Pattern Maker uses the camera to photograph garment patterns.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "extra": {
