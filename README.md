@@ -27,10 +27,18 @@ npx expo prebuild
 This creates `android/` and `ios/`. Re-run it only when a native library is
 added, removed, or upgraded. JavaScript edits never need it.
 
-## 3. Dev Build for Android (1 free EAS build)
+## 3. Dev Build for Android
+
+Option A — EAS (1 free build):
 
 ```powershell
 eas build --platform android --profile development
+```
+
+Option B — Codemagic (no EAS account needed):
+
+```powershell
+git push   # codemagic.yaml builds app-debug.apk automatically on push to main
 ```
 
 Install the resulting APK on the test phone.

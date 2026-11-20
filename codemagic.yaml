@@ -1,0 +1,99 @@
+# Codemagic CI: Android dev (debug APK) for the Expo dev client.
+# No EAS account needed. OpenCV (react-native-fast-opencv) compiles from
+# prebuilt Maven binaries + CMake, so this installs the exact NDK + CMake first.
+#
+# Setup in Codemagic: push this file, then click "Check for configuration
+# files" on the app page. The APK appears under build Artifacts.
+
+workflows:
+  android-dev-debug:
+    name: Android dev (debug APK)
+    instance_type: linux_x2
+    max_build_duration: 60
+    environment:
+      vars:
+        NODE_VERSION: "22"
+        # Keep Expo telemetry out of CI logs.
+        EXPO_NO_TELEMETRY: "1"
+    cache:
+      cache_paths:
+        - $HOME/.gradle/caches
+        - $HOME/.gradle/wrapper
+        - node_modules
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
+      cancel_previous_builds: true
+    scripts:
+      - name: Node 22
+        script: |
+          set -e
+          export NVM_DIR="$HOME/.nvm"
+          if [ -s "$NVM_DIR/nvm.sh" ]; then
+            . "$NVM_DIR/nvm.sh"
+          fi
+          if ! node --version 2>/dev/null | grep -q '^v22\.'; then
+            nvm install 22
+          fi
+          node --version
+          npm --version
+      - name: Install dependencies
+        script: |
+          set -e
+          export NVM_DIR="$HOME/.nvm"
+          if [ -s "$NVM_DIR/nvm.sh" ]; then
+            . "$NVM_DIR/nvm.sh"
+          fi
+          if ! node --version 2>/dev/null | grep -q '^v22\.'; then
+            nvm install 22
+          fi
+          npm ci --no-audit --no-fund
+      - name: Android SDK packages (NDK 27 + CMake for OpenCV)
+        script: |
+          set -e
+          export ANDROID_HOME="${ANDROID_HOME:-$HOME/Android/Sdk}"
+          export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
+          sdkmanager --version
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          # Pinned by react-native-fast-opencv (OpenCV 4.12.0, CMake >= 3.22.1).
+          sdkmanager --install "ndk;27.1.12297006" "cmake;3.22.1"
+      - name: Expo prebuild (generate android/)
+        script: |
+          set -e
+          export NVM_DIR="$HOME/.nvm"
+          if [ -s "$NVM_DIR/nvm.sh" ]; then
+            . "$NVM_DIR/nvm.sh"
+          fi
+          if ! node --version 2>/dev/null | grep -q '^v22\.'; then
+            nvm install 22
+          fi
+          npx expo prebuild --clean --no-install
+      - name: Build debug APK
+        script: |
+          set -e
+          export NVM_DIR="$HOME/.nvm"
+          if [ -s "$NVM_DIR/nvm.sh" ]; then
+            . "$NVM_DIR/nvm.sh"
+          fi
+          if ! node --version 2>/dev/null | grep -q '^v22\.'; then
+            nvm install 22
+          fi
+          # Gradle (and the RN bundle step) needs Java 17.
+          for d in /usr/lib/jvm/java-17-openjdk-amd64 /usr/lib/jvm/java-17-openjdk; do
+            if [ -x "$d/bin/java" ]; then
+              export JAVA_HOME="$d"
+              export PATH="$JAVA_HOME/bin:$PATH"
+              break
+            fi
+          done
+          java -version 2>&1 | head -1
+          chmod +x android/gradlew
+          cd android
+          ./gradlew assembleDebug
+    artifacts:
+      - android/app/build/outputs/apk/debug/app-debug.apk
